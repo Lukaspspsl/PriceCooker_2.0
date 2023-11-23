@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PriceCooker</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body style="background-color: #000033;">
+    <header class="bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h1>PriceCooker</h1>
+                </div>
+                <div class="col-md-6 text-right">
+                    {% if current_user.is_authenticated %}
+                        <p>Welcome back, {{ current_user.username }}</p>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-primary">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

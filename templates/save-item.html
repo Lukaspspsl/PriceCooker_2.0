@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add New Item</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Include additional stylesheets or scripts if necessary -->
+</head>
+<body>
+
+<h1>Add New Item for Price Tracking</h1>
+
+<!-- Feedback message area -->
+<div id="feedback"></div>
+
+<form id="addItemForm" action="/item/add" method="post">
+    <label for="name">Item Name (optional):</label>
+    <input type="text" id="name" name="name"><br>
+
+    <label for="url">Item URL:</label>
+    <input type="text" id="url" name="url" required><br>
+
+    <input type="submit" value="Add Item">
+</form>
+
+<script>
+    document.getElementById('addItemForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        fetch(this.action, {
+            method: this.method,
+            body: formData
+        }).then(response => response.json())
+          .then(data => {
+              document.getElementById('feedback').innerText = data.message; // Display feedback message
+          })
+          .catch(error => console.error('Error:', error));
+    });
+</script>
+
+</body>
+</html>

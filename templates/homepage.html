@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <title>PriceCooker</title>
+</head>
+
+<body class="dark-bg">
+<div class="container text-center">
+    <div class="header dark-bg white-text">
+        <div class="row">
+            <div class="col-6 text-left">
+    <h1 class="white-text mt-5 display-2">PriceCooker</h1>
+    <p class="white-text mt-3 lead">Give me an item and I will keep an eye on the price.</p>
+
+    <div class="neon-box mt-5">
+        <form class="form-card">
+            <input type="text" name="itemURL" class="url-box" placeholder="Enter URL of the item">
+            <button type="submit" class="submit-button">Submit</button>
+        </form>
+    </div>
+
+    <ul class="list-unstyled mt-5">
+        {% for item in items %}
+        <li class="url-item">
+            <div class="item-container">
+                <span class="item-title">{{ item.name }}</span>
+                <span class="delete-item" onclick="deleteItem('{{ item._id }}')" title="Delete item">X</span>
+            </div>
+
+            <div id="{{ item.name }}-card" class="price-card">
+                <canvas id="{{ item.name }}-chart"></canvas>
+                <div id="{{ item.name }}-prices">
+                    <div class="row">
+                        <div class="col-4 text-center">
+                            <h5>Actual Price</h5>
+                            <p id="{{ item.name }}-actual-price">{{ price_data.get(item.name, {}).get('actual', 'N/A')
+                                }} CZK</p>
+                        </div>
+                        <div class="col-4 text-center">
+                            <h5>Highest Price</h5>
+                            <p id="{{ item.name }}-highest-price">{{ price_data[item.name]['highest'] }} CZK</p>
+                        </div>
+                        <div class="col-4 text-center">
+                            <h5>Lowest Price</h5>
+                            <p id="{{ item.name }}-lowest-price">{{ price_data[item.name]['lowest'] }} CZK</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    <div class="footer dark-bg white-text">
+        <span><a href="mailto:lukaspospisill@gmail.com" class="email-link">@lukaspspsl</a></span>
+    </div>
+</div>
+
+
+<script>
+    function loadPriceData(name) {
+        fetch(`/price_history/${name}`)
+            .then(response => response.json())
+            .then(data => {
+                renderChart(name, data.history);
+                renderPrices(name, data.actual, data.highest, data.lowest);
+            })
+            .catch(error => console.error('Error fetching price data:', error));
+    }
+
+    function toggleCard(name) {
+        const card = document.getElementById(`${name}-card`);
+        console.log('Toggling card:', card);
+        if (card.style.display === "none" || !card.style.display) {
+            card.style.display = "flex";
+            loadPriceData(name);
+        } else {
+            card.style.display = "none";
+        }
+    }
+
+    function renderChart(name, history) {
+        const ctx = document.getElementById(`${name}-chart`).getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: history.map(item => item.timestamp),
+                datasets: [{
+                    label: 'Price over Time',
+                    data: history.map(item => item.price),
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            }
+        });
+    }
+
+    function renderPrices(name, actual, highest, lowest) {
+        document.getElementById(`${name}-actual-price`).innerText = actual;
+        document.getElementById(`${name}-highest-price`).innerText = highest;
+        document.getElementById(`${name}-lowest-price`).innerText = lowest;
+    }
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector(".form-card");
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+            const urlValue = document.querySelector(".url-box").value;
+            fetch("/items/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({url: urlValue})
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.message === "Item created") {
+                        location.reload();
+                    }
+                });
+        });
+    });
+
+    function deleteItem(itemId) {
+        if (confirm('Delete item?')) {
+            fetch(`/items/${itemId}`, {
+                method: 'DELETE',
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === "Item deleted") {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error deleting item:', error));
+        }
+    }
+
+</script>
+
+</body>
+</html>

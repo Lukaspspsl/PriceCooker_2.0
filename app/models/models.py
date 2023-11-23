@@ -17,10 +17,28 @@ from app.db import mongo_client
 
 # USERS
 class UserModel:
-    def __init__(self, username, password, _id=None):
+    def __init__(self, username, password, is_superuser,  _id=None):
         self.username = username
         self.password = password
+        self.is_superuser = is_superuser
         self._id = ObjectId(_id) if _id else None
+
+    def to_dict(self):
+        return {
+            "username": self.username,
+           "_id": str(self._id)
+        }
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self._id)
 
     @mongo_client
     def save(self, db=None):
@@ -55,6 +73,16 @@ class UserModel:
 
         except PyMongoError as e:
             print(f"Error finding user by ID: {e}")
+            return None
+
+    @classmethod
+    @mongo_client
+    def find_by_username(cls, username, db=None):
+        collection = db.users
+        user_data = collection.find_one({"username": username})
+        if user_data:
+            return cls(**user_data)
+        else:
             return None
 
     @mongo_client
@@ -100,6 +128,13 @@ class ItemModel:
         self.user_id = ObjectId(user_id)
         self._id = ObjectId(_id) if _id else None
 
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "url": self.url,
+           "_id": str(self._id)
+        }
+
     @mongo_client
     def save(self, db=None):
         try:
@@ -107,7 +142,6 @@ class ItemModel:
                 'name': self.name,
                 'url': self.url,
                 'user_id': self.user_id
-
             }
 
             collection = db.items

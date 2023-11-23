@@ -12,6 +12,7 @@ def store_price(price, item_id, db=None):
         collection.insert_one(new_price_entry)
         print(f"Price entry for item {item_id} added.")
 
+
 @mongo_client
 def store_name(name, item_id, db=None):
     collection = db.items
@@ -21,6 +22,7 @@ def store_name(name, item_id, db=None):
         print(f"Item name updated for item {item_id}.")
     else:
         print(f"No update made.")
+
 
 @mongo_client
 def store_in_db(name, price, url, db=None):

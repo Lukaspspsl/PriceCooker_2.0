@@ -1,4 +1,6 @@
 from flask import Blueprint, request, jsonify
+from flask_login import login_manager
+
 from app.models.models import UserModel, ItemModel, PriceHistoryModel
 
 api = Blueprint('api', __name__)
@@ -8,9 +10,17 @@ api = Blueprint('api', __name__)
 @api.route('/user', methods=['POST'])
 def create_user():
     data = request.json
-    user = UserModel(username=data['username'], password=data['password'])
+    user = UserModel(username=data['username'], password=data['password'], is_superuser=data['is_superuser'])
     user.save()
     return jsonify({"message": "User created", "user_id": str(user._id)}), 201
+
+#GET BY ID
+@api.route("user/<user_id>", methods=["GET"])
+def user_by_id(user_id):
+    user = UserModel.user_by_id(user_id)
+    if user:
+        return jsonify(user.to_dict()), 200
+    return jsonify({"error": "Not found"}), 404
 
 #UPDATE
 @api.route('/user/<user_id>', methods=['PUT'])
@@ -43,7 +53,7 @@ def create_item():
 #DISPLAY_BY_ID
 @api.route("item/<item_id>", methods=["GET"])
 def item_by_id(item_id):
-    data = request.json
+
     item = ItemModel.item_by_id(item_id)
     if item:
         return jsonify(item.to_dict()), 200
