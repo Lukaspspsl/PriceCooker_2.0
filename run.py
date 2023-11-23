@@ -5,6 +5,7 @@ from flask import Flask
 from app.db import mongo
 import logging
 from config import DevelopmentConfig
+from app.views.operations import api
 
 
 def create_app(config_class=DevelopmentConfig):
@@ -21,10 +22,8 @@ def create_app(config_class=DevelopmentConfig):
     def home():
         return "Hello World!"
 
-    # app.register_blueprint(home)
-    # app.register_blueprint(items, url_prefix="/items/")
-    # app.register_blueprint(auth, url_prefix="/auth/")
-    # print("Blueprints registered")
+    app.register_blueprint(api)
+    print("Blueprint registered")
 
     return app
 

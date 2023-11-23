@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
 
+from app import db
+
 load_dotenv()
 
 from datetime import datetime
@@ -34,6 +36,26 @@ class UserModel:
             print(f"User {self.username} created with ID: {result.inserted_id}")
         except PyMongoError as e:
             print(f"Error creating admin: {e}")
+
+    @classmethod
+    @mongo_client
+    def user_by_id(cls, user_id, db=None):
+        collection = db.users
+
+        try:
+            if not ObjectId.is_valid(user_id):
+                print("Invalid ID.")
+                return None
+
+            user_data = collection.find_one({"_id": ObjectId(user_id)})
+            if user_data:
+                return cls(**user_data)
+            else:
+                return None
+
+        except PyMongoError as e:
+            print(f"Error finding user by ID: {e}")
+            return None
 
     @mongo_client
     def update(self, update_data, db=None):
@@ -95,6 +117,33 @@ class ItemModel:
         except PyMongoError as e:
             print(f"Error creating admin: {e}")
 
+    @classmethod
+    @mongo_client
+    def find_all(cls, db=None):
+        collection = db.items
+        items = collection.find()
+        return [cls(**item) for item in items]
+
+    @classmethod
+    @mongo_client
+    def item_by_id(cls, item_id):
+
+        try:
+            collection = db.items
+            if not ObjectId.is_valid(item_id):
+                print("Invalid ID")
+                return None
+
+            item_data = collection.find_one({"_id": ObjectId(item_id)})
+            if item_data:
+                return cls(**item_data)
+            else:
+                return None
+
+        except PyMongoError as e:
+            print(f"Error finding Item: {e}")
+            return None
+
     @mongo_client
     def update(self, update_data, db=None):
         try:
@@ -129,6 +178,10 @@ class ItemModel:
             print(f"Error deleting item: {e}")
             return False
 
+    @property
+    def id(self):
+        return self._id
+
 
 # PRICE
 class PriceHistoryModel:
@@ -158,3 +211,30 @@ class PriceHistoryModel:
         except Exception as e:
             print(f"Error saving price history entry: {e}")
             return False
+
+    @classmethod
+    @mongo_client
+    def find_all(cls, db=None):
+        collection = db.price_history
+        data = collection.find()
+        return [cls(**data) for data in data]
+
+    @classmethod
+    @mongo_client
+    def price_by_id(cls, price_id, db=None):
+
+        try:
+            collection = db.price_history
+            if not ObjectId.is_valid(price_id):
+                print("Invalid ID")
+                return None
+
+            price_data = collection.find_one({"_id": ObjectId(price_id)})
+            if price_data:
+                return cls(**price_data)
+            else:
+                return None
+
+        except PyMongoError as e:
+            print(f"Error finding Item: {e}")
+            return None
