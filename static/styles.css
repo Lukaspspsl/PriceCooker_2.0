@@ -33,7 +33,7 @@ body.dark-bg {
 
 .submit-button {
     padding: 15px 30px;
-    margin: 30px 30px;
+    margin: 30px auto;
     border: none;
     background: rgba(255, 255, 255, 0.8);
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
@@ -121,4 +121,37 @@ body.dark-bg {
 .price-trend.down {
     color: red;
     content: "\2193"; /* Unicode for downward arrow */
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: rgba(50, 50, 50, 0.8); /* Semi-transparent dark background */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Light border for separation */
+}
+
+.navbar-brand {
+    color: white;
+    font-weight: bold;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.8); /* Slightly muted white */
+    margin-right: 10px; /* Spacing between links */
+}
+
+.nav-link:hover {
+    color: white; /* Bright white on hover for contrast */
+}
+
+.navbar-text {
+    color: white;
+    margin-right: 10px; /* Consistent spacing */
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 768px) {
+    .navbar-collapse {
+        background-color: rgba(50, 50, 50, 0.9); /* Dark background for collapsed menu */
+        padding: 10px; /* Padding for touch targets */
+    }
 }

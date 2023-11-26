@@ -11,7 +11,7 @@ import os
 mongo = PyMongo()
 
 def get_mongo():
-    """Connecting to MongoDB. Core function used by other functions."""
+    """Connecting to MongoDB. Core function used by CRUD  functions."""
 
     mongo_uri = os.environ.get('MONGO_URI')
     try:

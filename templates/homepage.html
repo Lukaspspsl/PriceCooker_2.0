@@ -2,23 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PriceCooker</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <title>PriceCooker</title>
 </head>
-
 <body class="dark-bg">
-<div class="container text-center">
-    <div class="header dark-bg white-text">
-        <div class="row">
-            <div class="col-6 text-left">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="{{ url_for('home.homepage') }}">PriceCooker</a>
+
+    <div class="navbar-collapse">
+        <ul class="navbar-nav ml-auto">
+            {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                    <span class="navbar-text">
+                        Hello {{ current_user.username }}, you are logged in.
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<header class="header text-center">
     <h1 class="white-text mt-5 display-2">PriceCooker</h1>
     <p class="white-text mt-3 lead">Give me an item and I will keep an eye on the price.</p>
+</header>
 
-    <div class="neon-box mt-5">
+<div class="container mt-5">
+    <div class="neon-box">
         <form class="form-card">
             <input type="text" name="itemURL" class="url-box" placeholder="Enter URL of the item">
             <button type="submit" class="submit-button">Submit</button>
@@ -27,65 +49,128 @@
 
     <ul class="list-unstyled mt-5">
         {% for item in items %}
-        <li class="url-item">
-            <div class="item-container">
-                <span class="item-title">{{ item.name }}</span>
-                <span class="delete-item" onclick="deleteItem('{{ item._id }}')" title="Delete item">X</span>
-            </div>
-
-            <div id="{{ item.name }}-card" class="price-card">
-                <canvas id="{{ item.name }}-chart"></canvas>
-                <div id="{{ item.name }}-prices">
-                    <div class="row">
-                        <div class="col-4 text-center">
-                            <h5>Actual Price</h5>
-                            <p id="{{ item.name }}-actual-price">{{ price_data.get(item.name, {}).get('actual', 'N/A')
-                                }} CZK</p>
-                        </div>
-                        <div class="col-4 text-center">
-                            <h5>Highest Price</h5>
-                            <p id="{{ item.name }}-highest-price">{{ price_data[item.name]['highest'] }} CZK</p>
-                        </div>
-                        <div class="col-4 text-center">
-                            <h5>Lowest Price</h5>
-                            <p id="{{ item.name }}-lowest-price">{{ price_data[item.name]['lowest'] }} CZK</p>
-                        </div>
-                    </div>
+            <li class="url-item" onclick="toggleCard('{{ item['_id'] }}')">
+                <div class="item-container">
+                    <span class="item-title">{{ item['name'] }}</span>
+                    <span class="delete-item" onclick="deleteItem('{{ item['_id'] }}', event)"
+                          title="Delete item">X</span>
                 </div>
-            </div>
-        </li>
+
+                <div id="{{ item['_id'] }}-card" class="price-card">
+                    <canvas id="{{ item['_id'] }}-chart"></canvas>
+                </div>
+            </li>
         {% endfor %}
     </ul>
-    <div class="footer dark-bg white-text">
-        <span><a href="mailto:lukaspospisill@gmail.com" class="email-link">@lukaspspsl</a></span>
-    </div>
 </div>
 
+<footer class="footer">
+    <span><a href="mailto:lukaspospisill@gmail.com" class="email-link">@lukaspspsl</a></span>
+</footer>
 
+<script src="{{ url_for('static', filename='main.js') }}"></script>
 <script>
-    function loadPriceData(name) {
-        fetch(`/price_history/${name}`)
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector(".form-card");
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+            const urlValue = document.querySelector(".url-box").value;
+            fetch("/item", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({url: urlValue})
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === "Item created") {
+                        addItemToList(data.item); // Assuming 'data.item' contains the new item's details
+                    } else {
+                        console.error('Error adding item:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error adding item:', error));
+        });
+    });
+
+function addItemToList(item) {
+    const itemList = document.querySelector('.list-unstyled');
+
+    // Create list item
+    const li = document.createElement('li');
+    li.className = 'url-item';
+    li.onclick = () => toggleCard(item._id);
+
+    // Create item container
+    const itemContainer = document.createElement('div');
+    itemContainer.className = 'item-container';
+
+    // Create title span
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'item-title';
+    titleSpan.textContent = item.name;
+
+    // Create delete button
+    const deleteSpan = document.createElement('span');
+    deleteSpan.className = 'delete-item';
+    deleteSpan.textContent = 'X';
+    deleteSpan.setAttribute('title', 'Delete item');
+    deleteSpan.onclick = (event) => {
+        event.stopPropagation(); // Prevent triggering toggleCard
+        deleteItem(item._id, event);
+    };
+
+    // Append title and delete button to container
+    itemContainer.appendChild(titleSpan);
+    itemContainer.appendChild(deleteSpan);
+
+    // Create price card div
+    const priceCardDiv = document.createElement('div');
+    priceCardDiv.id = `${item._id}-card`;
+    priceCardDiv.className = 'price-card';
+
+    // Create canvas for chart
+    const canvas = document.createElement('canvas');
+    canvas.id = `${item._id}-chart`;
+
+    // Append canvas to price card
+    priceCardDiv.appendChild(canvas);
+
+    // Append container and price card to list item
+    li.appendChild(itemContainer);
+    li.appendChild(priceCardDiv);
+
+    // Append list item to list
+    itemList.appendChild(li);
+}
+
+
+    function loadPriceData(itemId) {
+        fetch(`/price_history/${itemId}`)
             .then(response => response.json())
             .then(data => {
-                renderChart(name, data.history);
-                renderPrices(name, data.actual, data.highest, data.lowest);
+                renderChart(itemId, data.history);
+                renderPrices(itemId, data.actual, data.highest, data.lowest);
             })
             .catch(error => console.error('Error fetching price data:', error));
     }
 
-    function toggleCard(name) {
-        const card = document.getElementById(`${name}-card`);
-        console.log('Toggling card:', card);
+    function toggleCard(itemId) {
+        console.log("Toggling card for itemId:", itemId);
+        const card = document.getElementById(`${itemId}-card`);
+        console.log("Card element:", card);
         if (card.style.display === "none" || !card.style.display) {
             card.style.display = "flex";
-            loadPriceData(name);
+            loadPriceData(itemId);
         } else {
             card.style.display = "none";
         }
     }
 
-    function renderChart(name, history) {
-        const ctx = document.getElementById(`${name}-chart`).getContext('2d');
+    function renderChart(itemId, history) {
+        const ctx = document.getElementById(`${itemId}-chart`).getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
@@ -101,36 +186,16 @@
         });
     }
 
-    function renderPrices(name, actual, highest, lowest) {
-        document.getElementById(`${name}-actual-price`).innerText = actual;
-        document.getElementById(`${name}-highest-price`).innerText = highest;
-        document.getElementById(`${name}-lowest-price`).innerText = lowest;
+    function renderPrices(itemId, actual, highest, lowest) {
+        document.getElementById(`${itemId}-actual-price`).innerText = actual;
+        document.getElementById(`${itemId}-highest-price`).innerText = highest;
+        document.getElementById(`${itemId}-lowest-price`).innerText = lowest;
     }
 
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.querySelector(".form-card");
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();
-            const urlValue = document.querySelector(".url-box").value;
-            fetch("/items/add", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({url: urlValue})
-            }).then(response => response.json())
-                .then(data => {
-                    if (data.message === "Item created") {
-                        location.reload();
-                    }
-                });
-        });
-    });
-
-    function deleteItem(itemId) {
+    function deleteItem(itemId, event) {
+        event.stopPropagation(); // Stops the event from bubbling up to the parent element
         if (confirm('Delete item?')) {
-            fetch(`/items/${itemId}`, {
+            fetch(`/item/${itemId}`, {
                 method: 'DELETE',
             })
                 .then(response => response.json())
@@ -142,7 +207,6 @@
                 .catch(error => console.error('Error deleting item:', error));
         }
     }
-
 </script>
 
 </body>

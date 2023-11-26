@@ -1,14 +1,11 @@
 from dotenv import load_dotenv
-
-from app import db
-
-load_dotenv()
-
+from flask_login import UserMixin
 from datetime import datetime
 from bson import ObjectId
 from pymongo.errors import PyMongoError
 from app.db import mongo_client
 
+load_dotenv()
 
 # TODO: hash passwords
 # TODO: tests for Price data
@@ -16,7 +13,7 @@ from app.db import mongo_client
 
 
 # USERS
-class UserModel:
+class UserModel(UserMixin):
     def __init__(self, username, password, is_superuser,  _id=None):
         self.username = username
         self.password = password
@@ -29,13 +26,13 @@ class UserModel:
            "_id": str(self._id)
         }
 
-    @property
-    def is_active(self):
-        return True
-
-    @property
-    def is_anonymous(self):
-        return False
+    # @property
+    # def is_active(self):
+    #     return True
+    #
+    # @property
+    # def is_anonymous(self):
+    #     return False
 
     def get_id(self):
         return str(self._id)
@@ -57,7 +54,7 @@ class UserModel:
 
     @classmethod
     @mongo_client
-    def user_by_id(cls, user_id, db=None):
+    def user_by_id(cls, user_id: str, db=None):
         collection = db.users
 
         try:
@@ -122,17 +119,16 @@ class UserModel:
 
 # ITEMS
 class ItemModel:
-    def __init__(self, name, url, user_id, _id=None):
+    def __init__(self, name, url, _id=None):
         self.name = name
         self.url = url
-        self.user_id = ObjectId(user_id)
         self._id = ObjectId(_id) if _id else None
 
     def to_dict(self):
         return {
-            "name": self.name,
-            "url": self.url,
-           "_id": str(self._id)
+            '_id': str(self._id),
+            'name': self.name,
+            'url': self.url
         }
 
     @mongo_client
@@ -140,8 +136,7 @@ class ItemModel:
         try:
             new_item = {
                 'name': self.name,
-                'url': self.url,
-                'user_id': self.user_id
+                'url': self.url
             }
 
             collection = db.items
@@ -160,7 +155,7 @@ class ItemModel:
 
     @classmethod
     @mongo_client
-    def item_by_id(cls, item_id):
+    def item_by_id(cls, item_id, db=None):
 
         try:
             collection = db.items
@@ -214,6 +209,7 @@ class ItemModel:
 
     @property
     def id(self):
+        """Return the ID of the item."""
         return self._id
 
 

@@ -1,31 +1,47 @@
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
-from app.models.models import ItemModel, PriceHistoryModel
+from app.db import get_mongo
 
 home = Blueprint('home', __name__)
 
 @home.route('/', methods=['GET'])
-# @login_required
+@login_required
 def homepage():
-    if current_user.is_authenticated:
-        print(f"User {current_user.id} logged in")
-    else:
-        print("User not logged in")
+    # if current_user.is_authenticated:
+    #     print(f"User {current_user._id} logged in")
+    # else:
+    #     print("User not logged in")
 
-    items = ItemModel.find_all()
+    client = get_mongo()
+    db = client['mydb']
+
+    item_collection = db.items
+    price_history_collection = db.price_history
+
+    items = list(item_collection.find({}))
+
     price_data = {}
-
     for item in items:
-        prices = PriceHistoryModel.price_by_id(str(item._id)) or []  # Ensure this returns a list
-        actual_price = prices[-1].price if prices else 'N/A'
-        highest_price = max(p.price for p in prices) if prices else 'N/A'
-        lowest_price = min(p.price for p in prices) if prices else 'N/A'
+        prices = list(price_history_collection.find({"item_id": item["_id"]}))
+        if prices:
+            latest_price = prices[-1]['price']
+            highest_price = max(p['price'] for p in prices)
+            lowest_price = min(p['price'] for p in prices)
 
-        price_data[item.name] = {
-            'actual': actual_price,
-            'highest': highest_price,
-            'lowest': lowest_price,
-            'history': [(p.timestamp, p.price) for p in prices]
-        }
+            processed_price_data = {
+                'latest': latest_price,
+                'highest': highest_price,
+                'lowest': lowest_price,
+                'history': [(p['timestamp'], p['price']) for p in prices]
+            }
+        else:
+            processed_price_data = {
+                'latest': 'N/A',
+                'highest': 'N/A',
+                'lowest': 'N/A',
+                'history': []
+            }
 
-    return render_template('homepage.html', items=items, price_data=price_data)
+        price_data[item["_id"]] = processed_price_data
+
+    return render_template('homepage2.html', items=items, price_data=price_data)

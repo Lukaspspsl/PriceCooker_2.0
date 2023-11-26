@@ -1,7 +1,10 @@
+from bson import ObjectId
 from flask import Blueprint, request, jsonify
 from flask_login import login_manager
 
 from app.models.models import UserModel, ItemModel, PriceHistoryModel
+from app.scraping.db_ops import store_in_db
+from app.scraping.scraper import Scraper
 
 api = Blueprint('api', __name__)
 
@@ -46,9 +49,19 @@ def delete_user(user_id):
 @api.route('/item', methods=['POST'])
 def create_item():
     data = request.json
-    item = ItemModel(name=data['name'], url=data['url'], user_id=data['user_id'])
-    item.save()
-    return jsonify({"message": "Item created", "item_id": str(item._id)}), 201
+    url = data['url']
+
+    scraper = Scraper(url)
+    scraper.fetch_html()  # Fetch and set html_content
+    name = scraper.extract_name()
+    price = scraper.extract_price()
+
+    # Store the scraped data
+    if name and isinstance(price, float):
+        store_in_db(name, price, url)
+        return jsonify({'message': 'Item created and data stored successfully'}), 201
+    else:
+        return jsonify({'message': 'Failed to extract data from URL'}), 400
 
 #DISPLAY_BY_ID
 @api.route("item/<item_id>", methods=["GET"])
@@ -68,10 +81,19 @@ def display_all_items():
 #DELETE
 @api.route('/item/<item_id>', methods=['DELETE'])
 def delete_item(item_id):
-    result = ItemModel.delete(item_id)
-    if result:
-        return jsonify({"message": "Item deleted"}), 200
-    return jsonify({"error": "Item not found or could not be deleted"}), 404
+    try:
+        # Assuming you have a method to find an item by its ID
+        item = ItemModel.item_by_id(item_id)
+        if item:
+            result = item.delete()
+            if result:
+                return jsonify({"message": "Item deleted"}), 200
+            else:
+                return jsonify({"error": "Item not found or could not be deleted"}), 404
+        else:
+            return jsonify({"error": "Item not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 
 #PRICE DATA OPERATION

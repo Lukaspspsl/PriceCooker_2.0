@@ -2,9 +2,10 @@ from app.models.models import ItemModel, PriceHistoryModel
 from app.db import get_mongo, mongo_client
 from datetime import datetime
 
+
 @mongo_client
 def store_price(price, item_id, db=None):
-
+    """Store price in the database"""
     collection = db.price_history
 
     if price is not None and isinstance(price, float):
@@ -26,8 +27,8 @@ def store_name(name, item_id, db=None):
 
 @mongo_client
 def store_in_db(name, price, url, db=None):
-    item_collection = db.items  # Replace with your actual collection name
-    price_history_collection = db.price_history  # Replace with your actual collection name
+    item_collection = db.items
+    price_history_collection = db.price_history
 
     item = item_collection.find_one({"url": url})
     if not item:
