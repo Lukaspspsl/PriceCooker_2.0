@@ -7,6 +7,7 @@ from app.db import mongo_client
 
 load_dotenv()
 
+
 # TODO: hash passwords
 # TODO: tests for Price data
 # TODO: tests fod Items
@@ -14,7 +15,7 @@ load_dotenv()
 
 # USERS
 class UserModel(UserMixin):
-    def __init__(self, username, password, is_superuser,  _id=None):
+    def __init__(self, username, password, is_superuser, _id=None):
         self.username = username
         self.password = password
         self.is_superuser = is_superuser
@@ -23,7 +24,7 @@ class UserModel(UserMixin):
     def to_dict(self):
         return {
             "username": self.username,
-           "_id": str(self._id)
+            "_id": str(self._id)
         }
 
     # @property
@@ -221,6 +222,13 @@ class PriceHistoryModel:
         self.timestamp = timestamp if timestamp else datetime.now()
         self._id = ObjectId(_id) if _id else None
 
+    def to_dict(self):
+        return {
+            '_id': str(self._id),
+            'price': self.price,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+        }
+
     @mongo_client
     def save(self, db=None):
         try:
@@ -251,20 +259,22 @@ class PriceHistoryModel:
 
     @classmethod
     @mongo_client
-    def price_by_id(cls, price_id, db=None):
+    def price_by_id(cls, item_id, db=None):
 
         try:
             collection = db.price_history
-            if not ObjectId.is_valid(price_id):
+            if not ObjectId.is_valid(item_id):
                 print("Invalid ID")
                 return None
 
-            price_data = collection.find_one({"_id": ObjectId(price_id)})
-            if price_data:
-                return cls(**price_data)
-            else:
-                return None
+            price_data = collection.find({"item_id": ObjectId(item_id)})
+            print("searching for price data associated with item_id:", item_id)
+            price_histories = []
+            for data in price_data:
+                print("price data found for item_id:", item_id)
+                price_histories.append(cls(**data))
 
-        except PyMongoError as e:
-            print(f"Error finding Item: {e}")
+            return price_histories
+        except Exception as e:
+            print(f"Error in price_by_id: {e}")
             return None

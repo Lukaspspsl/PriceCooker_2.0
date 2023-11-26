@@ -65,4 +65,4 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return jsonify({"message": "Logged out successfully"}), 200
+    return redirect(url_for("home.homepage"))

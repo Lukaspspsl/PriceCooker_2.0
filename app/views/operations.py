@@ -50,16 +50,14 @@ def delete_user(user_id):
 def create_item():
     data = request.json
     url = data['url']
-
     scraper = Scraper(url)
-    scraper.fetch_html()  # Fetch and set html_content
+    scraper.fetch_html()
     name = scraper.extract_name()
     price = scraper.extract_price()
 
-    # Store the scraped data
-    if name and isinstance(price, float):
-        store_in_db(name, price, url)
-        return jsonify({'message': 'Item created and data stored successfully'}), 201
+    if name and isinstance(price, float) or isinstance(price, int):
+        item_id = store_in_db(name, price, url)
+        return jsonify({'message': 'Item created and data stored successfully', 'item': {'_id': str(item_id), 'name': name}}), 201
     else:
         return jsonify({'message': 'Failed to extract data from URL'}), 400
 
