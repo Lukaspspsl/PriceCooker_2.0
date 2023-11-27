@@ -39,7 +39,7 @@ def create_app(config_class=DevelopmentConfig):
     #     thread = Thread(target=inner_func)
     #     thread.start()
     #
-    # run_periodically(3600, periodical_scraper, app) #3600
+    # run_periodically(60, periodical_scraper, app) #3600
 
     return app
 
