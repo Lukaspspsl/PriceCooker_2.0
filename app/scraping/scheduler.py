@@ -43,11 +43,4 @@ def periodical_scraper(app):
             logging.error(f"An error occurred: {e}")
 
 
-def run_periodically(interval, func, app):
-    def inner_func():
-        while True:
-            func(app)
-            time.sleep(interval)
 
-    thread = Thread(target=inner_func)
-    thread.start()

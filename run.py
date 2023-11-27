@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from app.scraping.scheduler import run_periodically, periodical_scraper
+from app.scraping.scheduler import periodical_scraper
 from flask import Flask
 from app.db import mongo
 import logging
@@ -9,6 +9,8 @@ from app.views.operations import api
 from app.views.home import home
 from app.auth.auth import auth_bp
 from app.views.userloader import login_manager
+from threading import Thread
+import time
 
 load_dotenv()
 
@@ -17,8 +19,6 @@ def create_app(config_class=DevelopmentConfig):
     print("Creating app...")
     app = Flask(__name__)
     app.config.from_object(config_class)
-
-    print("Database init...")
     mongo.init_app(app)
 
     login_manager.init_app(app)
@@ -29,15 +29,21 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(api, url_prefix="/")
     app.register_blueprint(home, url_prefix="/")
     app.register_blueprint(auth_bp, url_prefix="/auth/")
-    print("Blueprint registered")
 
-    run_periodically(3600, periodical_scraper, app) #3600
+    # def run_periodically(interval, func, app):
+    #     def inner_func():
+    #         while True:
+    #             func(app)
+    #             time.sleep(interval)
+    #
+    #     thread = Thread(target=inner_func)
+    #     thread.start()
+    #
+    # run_periodically(3600, periodical_scraper, app) #3600
 
     return app
 
 
 if __name__ == "__main__":
-    print("Starting process...")
     app = create_app()
-    print("App created")
     app.run(debug=True)
