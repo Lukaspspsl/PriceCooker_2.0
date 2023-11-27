@@ -46,6 +46,7 @@ def delete_user(user_id):
 
 # ITEM OPERATION
 #CREATE
+#TODO: send complete data to frontend imediatelly for initial display
 @api.route('/item', methods=['POST'])
 def create_item():
     data = request.json

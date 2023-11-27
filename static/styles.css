@@ -125,8 +125,9 @@ body.dark-bg {
 
 /* Navbar Styles */
 .navbar {
-    background-color: rgba(50, 50, 50, 0.8); /* Semi-transparent dark background */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Light border for separation */
+    background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
+    backdrop-filter: blur(5px); /* Blurs the background behind the navbar */
+    -webkit-backdrop-filter: blur(5px); /* For Safari */
 }
 
 .navbar-brand {
@@ -148,10 +149,3 @@ body.dark-bg {
     margin-right: 10px; /* Consistent spacing */
 }
 
-/* Adjustments for smaller screens */
-@media (max-width: 768px) {
-    .navbar-collapse {
-        background-color: rgba(50, 50, 50, 0.9); /* Dark background for collapsed menu */
-        padding: 10px; /* Padding for touch targets */
-    }
-}

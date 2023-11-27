@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
-load_dotenv()
-
+from app.scraping.scheduler import run_periodically, periodical_scraper
 from flask import Flask
 from app.db import mongo
 import logging
@@ -10,6 +9,9 @@ from app.views.operations import api
 from app.views.home import home
 from app.auth.auth import auth_bp
 from app.views.userloader import login_manager
+
+load_dotenv()
+
 
 def create_app(config_class=DevelopmentConfig):
     print("Creating app...")
@@ -28,6 +30,8 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(home, url_prefix="/")
     app.register_blueprint(auth_bp, url_prefix="/auth/")
     print("Blueprint registered")
+
+    run_periodically(3600, periodical_scraper, app) #3600
 
     return app
 

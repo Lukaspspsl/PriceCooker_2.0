@@ -42,3 +42,22 @@ def store_in_db(name, price, url, db=None):
         new_price_entry = {"price": price, "item_id": item_id, "timestamp": datetime.now()}
         price_history_collection.insert_one(new_price_entry)
         print(f"Price  entry for item {item_id} added.")
+
+
+@mongo_client
+def store_new_price (url, price, db=None):
+    item_collection = db.items
+    price_history_collection = db.price_history
+
+    item = item_collection.find_one({"url": url})
+    if not item:
+        print(f"No item found for URL: {url}")
+        return
+
+    if isinstance(price, float) or isinstance(price, int):
+        item_id = item["_id"]
+        new_price_entry = {"price": price, "item_id": item_id, "timestamp": datetime.now()}
+        price_history_collection.insert_one(new_price_entry)
+        print(f"New price entry for item {item_id} added.")
+    else:
+        print(f"Invalid price for URL: {url}")

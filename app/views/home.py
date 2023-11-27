@@ -29,6 +29,7 @@ def homepage():
             lowest_price = min(p['price'] for p in prices)
 
             processed_price_data = {
+                'name': item['name'],
                 'latest': latest_price,
                 'highest': highest_price,
                 'lowest': lowest_price,
@@ -36,6 +37,7 @@ def homepage():
             }
         else:
             processed_price_data = {
+                'name': item['name'],
                 'latest': 'N/A',
                 'highest': 'N/A',
                 'lowest': 'N/A',
