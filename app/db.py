@@ -17,7 +17,7 @@ def get_mongo():
     try:
         client = MongoClient(mongo_uri, server_api=ServerApi('1'))
         client.admin.command('ping')
-        print("Pinged your deployment. You successfully connected to MongoDB!")
+
         return client
     except Exception as e:
         print(e)

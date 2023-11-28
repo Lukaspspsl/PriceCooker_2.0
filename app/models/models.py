@@ -9,9 +9,7 @@ load_dotenv()
 
 
 # TODO: hash passwords
-# TODO: tests for Price data
-# TODO: tests fod Items
-
+# TODO: tests
 
 # USERS
 class UserModel(UserMixin):
@@ -26,14 +24,6 @@ class UserModel(UserMixin):
             "username": self.username,
             "_id": str(self._id)
         }
-
-    # @property
-    # def is_active(self):
-    #     return True
-    #
-    # @property
-    # def is_anonymous(self):
-    #     return False
 
     def get_id(self):
         return str(self._id)
@@ -55,7 +45,7 @@ class UserModel(UserMixin):
 
     @classmethod
     @mongo_client
-    def user_by_id(cls, user_id: str, db=None):
+    def user_by_id(cls, user_id, db=None):
         collection = db.users
 
         try:

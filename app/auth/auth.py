@@ -35,10 +35,9 @@ def register():
         new_user.save()
         print(f"User {new_user.username} created with ID: {new_user._id}")
         login_user(new_user)
-
+        return redirect(url_for("auth.login"))
         # token = generate_token(str(new_user._id))
-        return jsonify({"message": "User created"}), 200
-        # return redirect(url_for('homepage'))
+
     else:
         return render_template("enter.html")
 
@@ -54,7 +53,7 @@ def login():
 
         if user and user.password == password:
             login_user(user)
-            return jsonify({"message": "Logged in successfully"}), 200
+            return redirect(url_for("home.homepage"))
         else:
             return jsonify({"message": "Invalid username or password"}), 401
     else:

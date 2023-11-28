@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for
 from flask_login import login_required, current_user
 from app.db import get_mongo
 
@@ -7,11 +7,6 @@ home = Blueprint('home', __name__)
 @home.route('/', methods=['GET'])
 @login_required
 def homepage():
-    # if current_user.is_authenticated:
-    #     print(f"User {current_user._id} logged in")
-    # else:
-    #     print("User not logged in")
-
     client = get_mongo()
     db = client['mydb']
 

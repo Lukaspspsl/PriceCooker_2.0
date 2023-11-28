@@ -1,5 +1,4 @@
 import os
-import logging
 
 
 class Config:
@@ -24,10 +23,3 @@ class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
     # Other test-specific settings
-
-
-class LoggingConfig(Config):
-    """Logging configuration."""
-
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
