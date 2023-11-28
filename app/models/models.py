@@ -110,9 +110,10 @@ class UserModel(UserMixin):
 
 # ITEMS
 class ItemModel:
-    def __init__(self, name, url, _id=None):
+    def __init__(self, name, url, user_id, _id=None):
         self.name = name
         self.url = url
+        self.user_id = ObjectId(user_id)
         self._id = ObjectId(_id) if _id else None
 
     def to_dict(self):

@@ -1,6 +1,6 @@
 from bson import ObjectId
 from flask import Blueprint, request, jsonify
-from flask_login import login_manager
+from flask_login import login_manager, current_user
 
 from app.models.models import UserModel, ItemModel, PriceHistoryModel
 from app.scraping.db_ops import store_in_db
@@ -49,6 +49,9 @@ def delete_user(user_id):
 #TODO: send complete data to frontend imediatelly for initial display
 @api.route('/item', methods=['POST'])
 def create_item():
+    if not current_user.is_authenticated:
+        return jsonify({"error": "Not logged in"}), 401
+
     data = request.json
     url = data['url']
     scraper = Scraper(url)
@@ -57,7 +60,7 @@ def create_item():
     price = scraper.extract_price()
 
     if name and isinstance(price, float) or isinstance(price, int):
-        item_id = store_in_db(name, price, url)
+        item_id = store_in_db(name, price, url, str(current_user._id))
         return jsonify({'message': 'Item created and data stored successfully', 'item': {'_id': str(item_id), 'name': name}}), 201
     else:
         return jsonify({'message': 'Failed to extract data from URL'}), 400

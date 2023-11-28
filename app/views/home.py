@@ -13,7 +13,7 @@ def homepage():
     item_collection = db.items
     price_history_collection = db.price_history
 
-    items = list(item_collection.find({}))
+    items = list(item_collection.find({"user_id": current_user._id}))
 
     price_data = {}
     for item in items:

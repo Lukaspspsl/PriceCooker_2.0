@@ -1,3 +1,5 @@
+from bson import ObjectId
+
 from app.models.models import ItemModel, PriceHistoryModel
 from app.db import get_mongo, mongo_client
 from datetime import datetime
@@ -26,13 +28,13 @@ def store_name(name, item_id, db=None):
 
 
 @mongo_client
-def store_in_db(name, price, url, db=None):
+def store_in_db(name, price, url, user_id, db=None):
     item_collection = db.items
     price_history_collection = db.price_history
 
     item = item_collection.find_one({"url": url})
     if not item:
-        item = {"name": name, "url": url}
+        item = {"name": name, "url": url, "user_id": ObjectId(user_id)}
         result = item_collection.insert_one(item)
         item_id = result.inserted_id
     else:

@@ -43,7 +43,7 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(home, url_prefix="/")
     app.register_blueprint(auth_bp, url_prefix="/auth/")
 
-    # run_periodically(60, periodical_scraper, app) #3600
+    run_periodically(60, periodical_scraper, app) #3600
 
     return app
 
