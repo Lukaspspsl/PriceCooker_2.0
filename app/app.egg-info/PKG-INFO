@@ -1,0 +1,27 @@
+Metadata-Version: 2.1
+Name: app
+Version: 0.0.0
+Summary: PriceCooker 2.0
+Author: pspsl
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Python: >=3.6
+Requires-Dist: Flask~=3.0.0
+Requires-Dist: Flask-PyMongo
+Requires-Dist: pymongo~=4.6.0
+Requires-Dist: python-dotenv~=1.0.0
+Requires-Dist: requests~=2.31.0
+Requires-Dist: beautifulsoup4~=4.12.2
+Requires-Dist: PyJWT~=2.8.0
+Requires-Dist: Werkzeug~=3.0.1
+Requires-Dist: mongomock~=4.1.2
+Provides-Extra: testing
+Requires-Dist: pytest>=6.0; extra == "testing"
+Requires-Dist: pytest-cov>=2.0; extra == "testing"
+Requires-Dist: mypy>=0.910; extra == "testing"
+Requires-Dist: flake8>=3.9; extra == "testing"
+Requires-Dist: tox>=3.24; extra == "testing"

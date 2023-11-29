@@ -7,3 +7,12 @@ beautifulsoup4~=4.12.2
 PyJWT~=2.8.0
 Werkzeug~=3.0.1
 mongomock~=4.1.2
+
+app~=0.0.0
+pytest~=7.4.3
+pytest-cov~=3.0.0
+setuptools~=69.0.2
+flake8~=4.0.0
+tox~=3.24.4
+mypy~=0.910.0
+```

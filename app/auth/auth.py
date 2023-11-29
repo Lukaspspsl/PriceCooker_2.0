@@ -1,6 +1,6 @@
 import datetime
 import jwt
-from flask import request, jsonify, Blueprint, render_template, url_for, redirect
+from flask import request, jsonify, Blueprint, render_template, url_for, redirect, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.models import UserModel
@@ -60,8 +60,12 @@ def login():
         return render_template("enter.html")
 
 
-@auth_bp.route("/logout", methods=["GET", "POST"])
+@auth_bp.route("/logout", methods=["POST"])
 @login_required
 def logout():
-    logout_user()
-    return redirect(url_for("home.homepage"))
+    try:
+        logout_user()
+        session.clear()
+        return redirect(url_for("auth.login"))
+    except Exception as e:
+        return jsonify({"message": "Error."}), 500
