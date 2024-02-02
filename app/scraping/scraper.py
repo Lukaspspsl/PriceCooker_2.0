@@ -1,6 +1,6 @@
-import requests
 from bs4 import BeautifulSoup
 import re
+from security import safe_requests
 
 #TODO: add rate limiter and headers to avoid being blocked
 class Scraper:
@@ -10,7 +10,7 @@ class Scraper:
 
     def fetch_html(self):
         """Fetch html content from url"""
-        response = requests.get(self.url, timeout=60)
+        response = safe_requests.get(self.url, timeout=60)
         return response.text if response.status_code == 200 else None
 
     def extract_price(self):
